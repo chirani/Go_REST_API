@@ -1,7 +1,3 @@
-/*
-source : https://blog.logrocket.com/rest-api-golang-gin-gorm/
-*/
-
 package main
 
 import (
