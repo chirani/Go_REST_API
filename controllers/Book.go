@@ -1,17 +1,13 @@
 package controllers
 
 import (
-	"net/http"
-
 	"github.com/chirani/book-rest/models"
-	"github.com/gin-gonic/gin"
 )
 
-func FindBooks(c *gin.Context) {
+func FindBooks() []models.Book {
 	var books []models.Book
 	models.DB.Find(&books)
-
-	c.JSON(http.StatusOK, gin.H{"data": books})
+	return books
 }
 
 type CreateBookInput struct {
@@ -19,30 +15,19 @@ type CreateBookInput struct {
 	Author string `json:"author" binding:"required"`
 }
 
-func CreateBook(c *gin.Context) {
-	// Validate input
-	var input CreateBookInput
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	// Create book
+func CreateBook(input *CreateBookInput) *models.Book {
 	book := models.Book{Title: input.Title, Author: input.Author}
 	models.DB.Create(&book)
-
-	c.JSON(http.StatusCreated, gin.H{"data": book})
+	return &book
 }
 
-func FindBook(c *gin.Context) { // Get model if exist
+func FindBook(id string) *models.Book { // Get model if exist
 	var book models.Book
 
-	if err := models.DB.Where("id = ?", c.Param("id")).First(&book).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
-		return
+	if err := models.DB.Where(id, id).First(&book).Error; err != nil {
+		return nil
 	}
-
-	c.JSON(http.StatusOK, gin.H{"data": book})
+	return &book
 }
 
 type UpdateBookInput struct {
@@ -50,34 +35,24 @@ type UpdateBookInput struct {
 	Author string `json:"author"`
 }
 
-func UpdateBook(c *gin.Context) {
+func UpdateBook(id string, input UpdateBookInput) *models.Book {
 
 	var book models.Book
-	if err := models.DB.Where("id = ?", c.Param("id")).First(&book).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
-		return
-	}
-
-	var input UpdateBookInput
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+	if err := models.DB.Where(id, id).First(&book).Error; err != nil {
+		return nil
 	}
 
 	models.DB.Model(&book).Updates(input)
+	return &book
 
-	c.JSON(http.StatusOK, gin.H{"data": book})
 }
 
-func DeleteBook(c *gin.Context) {
+func DeleteBook(id string) {
 	var book models.Book
 
-	if err := models.DB.Where("id = ?", c.Param("id")).First(&book).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
+	if err := models.DB.Where(id, id).First(&book).Error; err != nil {
 		return
 	}
 
 	models.DB.Delete(&book)
-
-	c.JSON(http.StatusOK, gin.H{"data": true})
 }
