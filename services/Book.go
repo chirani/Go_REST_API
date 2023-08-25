@@ -28,9 +28,11 @@ func FindBook(c *gin.Context) {
 	id := c.Param("id")
 	book := controllers.FindBook(id)
 
-	if book != nil {
-		c.JSON(http.StatusOK, gin.H{"data": book})
+	if book == nil {
+		c.JSON(http.StatusNotFound, gin.H{"data": "404"})
+		return
 	}
+	c.JSON(http.StatusNotFound, gin.H{"data": book})
 }
 
 func UpdateBook(c *gin.Context) {
