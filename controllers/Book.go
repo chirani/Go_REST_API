@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"github.com/chirani/book-rest/models"
+	"gorm.io/gorm"
 )
 
 func FindBooks() []models.Book {
@@ -15,19 +16,16 @@ type CreateBookInput struct {
 	Author string `json:"author" binding:"required"`
 }
 
-func CreateBook(input *CreateBookInput) *models.Book {
+func CreateBook(input *CreateBookInput) *gorm.DB {
 	book := models.Book{Title: input.Title, Author: input.Author}
-	models.DB.Create(&book)
-	return &book
+
+	return models.DB.Create(&book)
 }
 
-func FindBook(id string) *models.Book { // Get model if exist
+func FindBook(id string) *gorm.DB {
 	var book models.Book
 
-	if err := models.DB.Where(id, id).First(&book).Error; err != nil {
-		return nil
-	}
-	return &book
+	return models.DB.Where(id, id).First(&book)
 }
 
 type UpdateBookInput struct {
@@ -35,15 +33,14 @@ type UpdateBookInput struct {
 	Author string `json:"author"`
 }
 
-func UpdateBook(id string, input UpdateBookInput) *models.Book {
+func UpdateBook(id string, input UpdateBookInput) *gorm.DB {
 
 	var book models.Book
 	if err := models.DB.Where(id, id).First(&book).Error; err != nil {
 		return nil
 	}
 
-	models.DB.Model(&book).Updates(input)
-	return &book
+	return models.DB.Model(&book).Updates(input)
 
 }
 
